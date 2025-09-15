@@ -44,6 +44,7 @@ export function Dashboard() {
       setError(null);
       
       const headers = getHeaders();
+      console.log('Dashboard headers:', headers); // Debug log
       const [summaryResponse, glSummaryResponse] = await Promise.all([
         ledgerAPI.getLedgerSummaries(headers),
         ledgerAPI.getGLSummary(undefined, headers)

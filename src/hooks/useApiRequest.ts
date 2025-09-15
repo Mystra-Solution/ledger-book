@@ -36,13 +36,13 @@ export function useApiRequest<T>({
     } finally {
       setLoading(false);
     }
-  }, [apiCall, getHeaders, isConfigured]);
+  }, [isConfigured]); // Remove apiCall and getHeaders from dependencies
 
   useEffect(() => {
-    if (!skipInitialCall) {
+    if (!skipInitialCall && isConfigured) {
       executeRequest();
     }
-  }, [executeRequest, isConfigured, ...dependencies]);
+  }, [isConfigured, ...dependencies]); // Remove executeRequest from dependencies
 
   return {
     data,

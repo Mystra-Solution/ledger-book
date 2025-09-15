@@ -27,20 +27,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Load settings from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSettings(parsed);
-      } catch (error) {
-        console.error('Failed to parse saved auth settings:', error);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setSettings(parsed);
+        } catch (error) {
+          console.error('Failed to parse saved auth settings:', error);
+        }
       }
     }
   }, []);
 
   const updateSettings = (newSettings: AuthSettings) => {
     setSettings(newSettings);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+    }
   };
 
   const getHeaders = () => {

@@ -8,15 +8,18 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ApiStatusBanner } from '@/components/common/ApiStatusBanner';
 import { Pagination } from '@/components/common/Pagination';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ledgerAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, getTransactionTypeColor, getDueDateStatus } from '@/lib/utils';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
 import type { PurchaseLedgerData, PurchaseTransaction } from '@/types/ledger';
 import { Search, Filter, Download } from 'lucide-react';
 
 export function PurchaseLedger() {
+  const { getHeaders, isConfigured } = useAuth();
   const [data, setData] = useState<PurchaseLedgerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,17 +28,24 @@ export function PurchaseLedger() {
   const [selectedSupplier, setSelectedSupplier] = useState<string>('');
 
   const fetchData = async () => {
+    if (!isConfigured) {
+      setError('Please configure your API settings first');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
+      const headers = getHeaders();
       const params = {
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         ...(selectedSupplier && { supplierId: selectedSupplier }),
       };
 
-      const response = await ledgerAPI.getPurchaseLedger(params);
+      const response = await ledgerAPI.getPurchaseLedger(params, headers);
       setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch purchase ledger data');
@@ -46,7 +56,7 @@ export function PurchaseLedger() {
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, selectedSupplier]);
+  }, [currentPage, selectedSupplier, isConfigured]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -87,6 +97,8 @@ export function PurchaseLedger() {
           Export
         </Button>
       </PageHeader>
+
+      <ApiStatusBanner />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

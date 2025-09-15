@@ -5,11 +5,11 @@ import { DEFAULT_DATE_FORMAT, DEFAULT_DATETIME_FORMAT } from './constants';
 
 export function formatCurrency(amount: string | number): string {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(numAmount)) return '₹0.00';
+  if (isNaN(numAmount)) return 'LKR 0.00';
   
-  return new Intl.NumberFormat('en-IN', {
+  return new Intl.NumberFormat('en-LK', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'LKR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(numAmount);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
@@ -8,36 +8,63 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ApiStatusBanner } from '@/components/common/ApiStatusBanner';
 import { Pagination } from '@/components/common/Pagination';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ledgerAPI } from '@/lib/api';
-import { useApiRequest } from '@/hooks/useApiRequest';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, getTransactionTypeColor, getDueDateStatus } from '@/lib/utils';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
-import type { SalesLedgerData, SalesTransaction, ApiResponse } from '@/types/ledger';
+import type { SalesLedgerData, SalesTransaction } from '@/types/ledger';
 import { Search, Filter, Download } from 'lucide-react';
 
 export function SalesLedger() {
+  const { getHeaders, isConfigured } = useAuth();
+  const [data, setData] = useState<SalesLedgerData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<string>('');
 
-  const { data, loading, error, refetch } = useApiRequest<ApiResponse<SalesLedgerData>>({
-    apiCall: (headers) => ledgerAPI.getSalesLedger({
-      page: currentPage,
-      limit: ITEMS_PER_PAGE,
-      ...(selectedCustomer && { customerId: selectedCustomer }),
-    }, headers),
-    dependencies: [currentPage, selectedCustomer]
-  });
+  const fetchData = async () => {
+    if (!isConfigured) {
+      setError('Please configure your API settings first');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const headers = getHeaders();
+      console.log('Sales Ledger headers:', headers); // Debug log
+      const params = {
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+        ...(selectedCustomer && { customerId: selectedCustomer }),
+      };
+
+      const response = await ledgerAPI.getSalesLedger(params, headers);
+      setData(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch sales ledger data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, selectedCustomer, isConfigured]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
     // In a real app, you'd implement search logic here
   };
 
-  const salesData = data?.data;
-  const filteredTransactions = salesData?.transactions?.filter(transaction =>
+  const filteredTransactions = data?.transactions?.filter(transaction =>
     transaction.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     transaction.referenceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
     transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -56,7 +83,7 @@ export function SalesLedger() {
     return (
       <div className="space-y-6">
         <PageHeader title="Sales Ledger" description="Track customer transactions and balances" />
-        <ErrorMessage message={error} onRetry={refetch} />
+        <ErrorMessage message={error} onRetry={fetchData} />
       </div>
     );
   }
@@ -73,12 +100,14 @@ export function SalesLedger() {
         </Button>
       </PageHeader>
 
+      <ApiStatusBanner />
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(salesData?.totalBalance || '0')}
+              {formatCurrency(data?.totalBalance || '0')}
             </div>
             <p className="text-gray-600">Total Sales Balance</p>
           </CardContent>
@@ -86,7 +115,7 @@ export function SalesLedger() {
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-blue-600">
-              {salesData?.totalCustomers || 0}
+              {data?.totalCustomers || 0}
             </div>
             <p className="text-gray-600">Total Customers</p>
           </CardContent>
@@ -94,7 +123,7 @@ export function SalesLedger() {
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-purple-600">
-              {salesData?.totalTransactions || 0}
+              {data?.totalTransactions || 0}
             </div>
             <p className="text-gray-600">Total Transactions</p>
           </CardContent>
@@ -213,7 +242,7 @@ export function SalesLedger() {
           
           <Pagination
             currentPage={currentPage}
-            totalPages={Math.ceil((salesData?.totalTransactions || 0) / ITEMS_PER_PAGE)}
+            totalPages={Math.ceil((data?.totalTransactions || 0) / ITEMS_PER_PAGE)}
             onPageChange={setCurrentPage}
           />
         </CardContent>
