@@ -7,13 +7,16 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ApiStatusBanner } from '@/components/common/ApiStatusBanner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ledgerAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { TrialBalanceData, AccountBalanceData } from '@/types/ledger';
 import { Download, Calendar, Calculator } from 'lucide-react';
 
 export function TrialBalance() {
+  const { getHeaders, isConfigured } = useAuth();
   const [data, setData] = useState<TrialBalanceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,12 +85,20 @@ export function TrialBalance() {
   ];
 
   const fetchData = async () => {
+    if (!isConfigured) {
+      setError('Please configure your API settings first');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
+      const headers = getHeaders();
+      console.log('Trial Balance headers:', headers); // Debug log
       const params = asOfDate ? { asOfDate } : {};
-      const response = await ledgerAPI.getTrialBalance(params);
+      const response = await ledgerAPI.getTrialBalance(params, headers);
       setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch trial balance data');
@@ -98,7 +109,7 @@ export function TrialBalance() {
 
   useEffect(() => {
     fetchData();
-  }, [asOfDate]);
+  }, [asOfDate, isConfigured]);
 
   const accounts = data?.accounts && data.accounts.length > 0 ? data.accounts : mockAccounts;
   
@@ -141,6 +152,8 @@ export function TrialBalance() {
           Export PDF
         </Button>
       </PageHeader>
+
+      <ApiStatusBanner />
 
       {/* Controls */}
       <Card>

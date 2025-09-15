@@ -193,16 +193,16 @@ export function Dashboard() {
               </div>
               <div className="text-center">
                 <div className="text-lg text-gray-700">
-                  From: {formatDate(glSummary.period.startDate)}
+                  From: {formatDate(glSummary.period?.startDate)}
                 </div>
                 <div className="text-lg text-gray-700">
-                  To: {formatDate(glSummary.period.endDate)}
+                  To: {formatDate(glSummary.period?.endDate)}
                 </div>
                 <p className="text-gray-600">Period Range</p>
               </div>
               <div className="text-center">
                 <div className="text-sm text-gray-600 italic">
-                  {glSummary.summary.note}
+                  {glSummary.summary?.note}
                 </div>
               </div>
             </div>

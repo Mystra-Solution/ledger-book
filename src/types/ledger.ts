@@ -32,7 +32,7 @@ export interface SalesTransaction {
 
 export interface CustomerBalance {
   balance: string;
-  lastTransaction: string;
+  lastTransaction?: string;
 }
 
 export interface SalesLedgerData {
@@ -72,7 +72,7 @@ export interface PurchaseTransaction {
 
 export interface SupplierBalance {
   balance: string;
-  lastTransaction: string;
+  lastTransaction?: string;
 }
 
 export interface PurchaseLedgerData {
@@ -110,7 +110,7 @@ export interface CashTransaction {
 
 export interface AccountBalance {
   balance: string;
-  lastTransaction: string;
+  lastTransaction?: string;
 }
 
 export interface CashBookData {
@@ -187,13 +187,13 @@ export interface TrialBalanceData {
 
 export interface GLSummaryData {
   totalTransactions: number;
-  period: {
-    startDate: string;
-    endDate: string;
+  period?: {
+    startDate?: string;
+    endDate?: string;
   };
-  summary: {
-    message: string;
-    note: string;
+  summary?: {
+    message?: string;
+    note?: string;
   };
 }
 

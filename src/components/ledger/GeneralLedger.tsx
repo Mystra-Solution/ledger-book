@@ -8,15 +8,18 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ApiStatusBanner } from '@/components/common/ApiStatusBanner';
 import { Pagination } from '@/components/common/Pagination';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ledgerAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
 import type { GLTransactionsData, GLTransaction, GLEntriesData } from '@/types/ledger';
 import { Search, Filter, Download, Eye, FileText } from 'lucide-react';
 
 export function GeneralLedger() {
+  const { getHeaders, isConfigured } = useAuth();
   const [data, setData] = useState<GLTransactionsData | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<GLTransaction | null>(null);
   const [transactionEntries, setTransactionEntries] = useState<GLEntriesData | null>(null);
@@ -28,17 +31,25 @@ export function GeneralLedger() {
   const [selectedModule, setSelectedModule] = useState<string>('');
 
   const fetchData = async () => {
+    if (!isConfigured) {
+      setError('Please configure your API settings first');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
+      const headers = getHeaders();
+      console.log('General Ledger headers:', headers); // Debug log
       const params = {
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         ...(selectedModule && { sourceModule: selectedModule }),
       };
 
-      const response = await ledgerAPI.getGLTransactions(params);
+      const response = await ledgerAPI.getGLTransactions(params, headers);
       setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch general ledger data');
@@ -48,9 +59,14 @@ export function GeneralLedger() {
   };
 
   const fetchTransactionEntries = async (transactionId: string) => {
+    if (!isConfigured) {
+      return;
+    }
+
     try {
       setEntriesLoading(true);
-      const response = await ledgerAPI.getGLEntries(transactionId);
+      const headers = getHeaders();
+      const response = await ledgerAPI.getGLEntries(transactionId, headers);
       setTransactionEntries(response.data);
     } catch (err) {
       console.error('Failed to fetch transaction entries:', err);
@@ -61,7 +77,7 @@ export function GeneralLedger() {
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, selectedModule]);
+  }, [currentPage, selectedModule, isConfigured]);
 
   const handleViewEntries = async (transaction: GLTransaction) => {
     setSelectedTransaction(transaction);
@@ -107,6 +123,8 @@ export function GeneralLedger() {
           Export
         </Button>
       </PageHeader>
+
+      <ApiStatusBanner />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

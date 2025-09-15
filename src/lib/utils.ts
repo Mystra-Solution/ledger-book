@@ -15,7 +15,11 @@ export function formatCurrency(amount: string | number): string {
   }).format(numAmount);
 }
 
-export function formatDate(dateString: string, formatStr: string = DEFAULT_DATE_FORMAT): string {
+export function formatDate(dateString: string | undefined | null, formatStr: string = DEFAULT_DATE_FORMAT): string {
+  if (!dateString) {
+    return 'N/A';
+  }
+  
   try {
     const date = parseISO(dateString);
     return format(date, formatStr);
@@ -25,7 +29,7 @@ export function formatDate(dateString: string, formatStr: string = DEFAULT_DATE_
   }
 }
 
-export function formatDateTime(dateString: string): string {
+export function formatDateTime(dateString: string | undefined | null): string {
   return formatDate(dateString, DEFAULT_DATETIME_FORMAT);
 }
 
@@ -49,7 +53,11 @@ export function getPaymentTermsColor(terms: string): string {
   return colors[terms] || 'text-gray-600 bg-gray-100';
 }
 
-export function calculateDaysUntilDue(dueDateString: string): number {
+export function calculateDaysUntilDue(dueDateString: string | undefined | null): number {
+  if (!dueDateString) {
+    return 0;
+  }
+  
   try {
     const dueDate = parseISO(dueDateString);
     const today = new Date();
@@ -61,7 +69,7 @@ export function calculateDaysUntilDue(dueDateString: string): number {
   }
 }
 
-export function getDueDateStatus(dueDateString: string): {
+export function getDueDateStatus(dueDateString: string | undefined | null): {
   status: 'overdue' | 'due-soon' | 'current';
   color: string;
   days: number;
