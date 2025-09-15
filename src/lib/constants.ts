@@ -1,10 +1,9 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'https://accounting-management-backend-development.up.railway.app',
-  TENANT_ID: '0198c8b0-e911-7334-ab83-a0d682e0dc05',
-  HEADERS: {
+  BASE_URL: 'https://mystra-api-gateway-production.up.railway.app',
+  DEFAULT_TENANT_ID: '0198c8b0-e911-7334-ab83-a0d682e0dc05',
+  DEFAULT_HEADERS: {
     'Content-Type': 'application/json',
-    'x-tenant-id': '0198c8b0-e911-7334-ab83-a0d682e0dc05',
   },
 };
 

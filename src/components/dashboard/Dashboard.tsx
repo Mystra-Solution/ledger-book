@@ -7,8 +7,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ApiStatusBanner } from '@/components/common/ApiStatusBanner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ledgerAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { LedgerSummary, GLSummaryData } from '@/types/ledger';
 import { 
@@ -24,19 +26,27 @@ import {
 } from 'lucide-react';
 
 export function Dashboard() {
+  const { getHeaders, isConfigured } = useAuth();
   const [summaryData, setSummaryData] = useState<LedgerSummary | null>(null);
   const [glSummary, setGlSummary] = useState<GLSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
+    if (!isConfigured) {
+      setError('Please configure your API settings first');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
+      const headers = getHeaders();
       const [summaryResponse, glSummaryResponse] = await Promise.all([
-        ledgerAPI.getLedgerSummaries(),
-        ledgerAPI.getGLSummary()
+        ledgerAPI.getLedgerSummaries(headers),
+        ledgerAPI.getGLSummary(undefined, headers)
       ]);
       
       setSummaryData(summaryResponse.data);
@@ -50,7 +60,7 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isConfigured]);
 
   if (loading) {
     return (
@@ -85,6 +95,8 @@ export function Dashboard() {
           Refresh Data
         </Button>
       </PageHeader>
+
+      <ApiStatusBanner />
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

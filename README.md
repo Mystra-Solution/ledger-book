@@ -88,10 +88,11 @@ src/
 
 ## API Integration
 
-The application integrates with the Accounting Management Backend API:
+The application integrates with the Mystra API Gateway:
 
-- **Base URL**: `https://accounting-management-backend-development.up.railway.app`
-- **Tenant ID**: `0198c8b0-e911-7334-ab83-a0d682e0dc05`
+- **Base URL**: `https://mystra-api-gateway-production.up.railway.app`
+- **Authentication**: Bearer token required
+- **Tenant ID**: Configurable via settings UI
 
 ### Supported Endpoints
 
@@ -130,10 +131,14 @@ The application integrates with the Accounting Management Backend API:
    npm run dev
    ```
 
-4. **Open in browser**
-   ```
-   http://localhost:3000
-   ```
+4. **Configure API Settings**
+   - Open the application in your browser: `http://localhost:3000`
+   - Click the "Settings" button in the navigation
+   - Enter your tenant ID and bearer token
+   - Save the settings
+
+5. **Start using the application**
+   - All API requests will now use your configured credentials
 
 ### Available Scripts
 
@@ -206,6 +211,12 @@ The dashboard provides a quick overview of your accounting data:
 - Consistent color coding
 - Status indicators and badges
 - Professional typography
+
+### 🔐 Secure Authentication
+- Bearer token authentication
+- Configurable tenant isolation
+- Local storage of credentials
+- API status indicators
 
 ## API Response Handling
 
