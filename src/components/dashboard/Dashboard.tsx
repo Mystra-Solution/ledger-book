@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
@@ -32,7 +32,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!isConfigured) {
       setError('Please configure your API settings first');
       setLoading(false);
@@ -57,11 +57,11 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isConfigured, getHeaders]);
 
   useEffect(() => {
     fetchData();
-  }, [isConfigured]);
+  }, [fetchData]);
 
   if (loading) {
     return (

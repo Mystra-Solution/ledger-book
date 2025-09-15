@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
@@ -30,7 +30,7 @@ export function GeneralLedger() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedModule, setSelectedModule] = useState<string>('');
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!isConfigured) {
       setError('Please configure your API settings first');
       setLoading(false);
@@ -56,7 +56,7 @@ export function GeneralLedger() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isConfigured, getHeaders, currentPage, selectedModule]);
 
   const fetchTransactionEntries = async (transactionId: string) => {
     if (!isConfigured) {
@@ -77,7 +77,7 @@ export function GeneralLedger() {
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, selectedModule, isConfigured]);
+  }, [fetchData]);
 
   const handleViewEntries = async (transaction: GLTransaction) => {
     setSelectedTransaction(transaction);

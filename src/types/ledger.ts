@@ -182,7 +182,7 @@ export interface AccountBalanceData {
 export interface TrialBalanceData {
   asOfDate: string;
   message: string;
-  accounts: any[];
+  accounts: AccountBalanceData[];
 }
 
 export interface GLSummaryData {

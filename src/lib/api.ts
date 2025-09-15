@@ -25,7 +25,7 @@ class LedgerAPI {
     this.baseURL = API_CONFIG.BASE_URL;
   }
 
-  private async request<T>(endpoint: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, params?: Record<string, unknown>, headers?: Record<string, string>): Promise<ApiResponse<T>> {
     const url = new URL(endpoint, this.baseURL);
     
     if (params) {
@@ -55,7 +55,7 @@ class LedgerAPI {
 
   // Sales Ledger APIs
   async getSalesLedger(params?: SalesLedgerParams, headers?: Record<string, string>): Promise<ApiResponse<SalesLedgerData>> {
-    return this.request<SalesLedgerData>(ENDPOINTS.SUBSIDIARY_LEDGERS.SALES_LEDGER, params, headers);
+    return this.request<SalesLedgerData>(ENDPOINTS.SUBSIDIARY_LEDGERS.SALES_LEDGER, params as Record<string, unknown>, headers);
   }
 
   async getCustomerBalance(customerId: string, headers?: Record<string, string>): Promise<ApiResponse<SalesLedgerData>> {
@@ -64,7 +64,7 @@ class LedgerAPI {
 
   // Purchase Ledger APIs
   async getPurchaseLedger(params?: PurchaseLedgerParams, headers?: Record<string, string>): Promise<ApiResponse<PurchaseLedgerData>> {
-    return this.request<PurchaseLedgerData>(ENDPOINTS.SUBSIDIARY_LEDGERS.PURCHASE_LEDGER, params, headers);
+    return this.request<PurchaseLedgerData>(ENDPOINTS.SUBSIDIARY_LEDGERS.PURCHASE_LEDGER, params as Record<string, unknown>, headers);
   }
 
   async getSupplierBalance(supplierId: string, headers?: Record<string, string>): Promise<ApiResponse<PurchaseLedgerData>> {
@@ -73,7 +73,7 @@ class LedgerAPI {
 
   // Cash Book APIs
   async getCashBook(params?: CashBookParams, headers?: Record<string, string>): Promise<ApiResponse<CashBookData>> {
-    return this.request<CashBookData>(ENDPOINTS.SUBSIDIARY_LEDGERS.CASH_BOOK, params, headers);
+    return this.request<CashBookData>(ENDPOINTS.SUBSIDIARY_LEDGERS.CASH_BOOK, params as Record<string, unknown>, headers);
   }
 
   async getAccountBalance(accountCode: string, headers?: Record<string, string>): Promise<ApiResponse<CashBookData>> {
@@ -87,7 +87,7 @@ class LedgerAPI {
 
   // General Ledger APIs
   async getGLTransactions(params?: GLTransactionParams, headers?: Record<string, string>): Promise<ApiResponse<GLTransactionsData>> {
-    return this.request<GLTransactionsData>(ENDPOINTS.GENERAL_LEDGER.TRANSACTIONS, params, headers);
+    return this.request<GLTransactionsData>(ENDPOINTS.GENERAL_LEDGER.TRANSACTIONS, params as Record<string, unknown>, headers);
   }
 
   async getGLEntries(transactionId: string, headers?: Record<string, string>): Promise<ApiResponse<GLEntriesData>> {
@@ -95,15 +95,15 @@ class LedgerAPI {
   }
 
   async getGLAccountBalance(accountCode: string, params?: AccountBalanceParams, headers?: Record<string, string>): Promise<ApiResponse<AccountBalanceData>> {
-    return this.request<AccountBalanceData>(`/api/accounting/general-ledger/accounts/${accountCode}/balance`, params, headers);
+    return this.request<AccountBalanceData>(`/api/accounting/general-ledger/accounts/${accountCode}/balance`, params as Record<string, unknown>, headers);
   }
 
   async getTrialBalance(params?: TrialBalanceParams, headers?: Record<string, string>): Promise<ApiResponse<TrialBalanceData>> {
-    return this.request<TrialBalanceData>(ENDPOINTS.GENERAL_LEDGER.TRIAL_BALANCE, params, headers);
+    return this.request<TrialBalanceData>(ENDPOINTS.GENERAL_LEDGER.TRIAL_BALANCE, params as Record<string, unknown>, headers);
   }
 
   async getGLSummary(params?: { startDate?: string; endDate?: string }, headers?: Record<string, string>): Promise<ApiResponse<GLSummaryData>> {
-    return this.request<GLSummaryData>(ENDPOINTS.GENERAL_LEDGER.SUMMARY, params, headers);
+    return this.request<GLSummaryData>(ENDPOINTS.GENERAL_LEDGER.SUMMARY, params as Record<string, unknown>, headers);
   }
 }
 

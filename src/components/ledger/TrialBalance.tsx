@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
@@ -12,7 +12,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { ledgerAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import type { TrialBalanceData, AccountBalanceData } from '@/types/ledger';
+import type { TrialBalanceData } from '@/types/ledger';
 import { Download, Calendar, Calculator } from 'lucide-react';
 
 export function TrialBalance() {
@@ -84,7 +84,7 @@ export function TrialBalance() {
     },
   ];
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!isConfigured) {
       setError('Please configure your API settings first');
       setLoading(false);
@@ -105,11 +105,11 @@ export function TrialBalance() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isConfigured, getHeaders, asOfDate]);
 
   useEffect(() => {
     fetchData();
-  }, [asOfDate, isConfigured]);
+  }, [fetchData]);
 
   const accounts = data?.accounts && data.accounts.length > 0 ? data.accounts : mockAccounts;
   
@@ -252,7 +252,10 @@ export function TrialBalance() {
               
               {/* Totals Row */}
               <TableRow className="bg-gray-50 font-bold">
-                <TableCell colSpan={2} className="text-right">
+                <TableCell className="text-right">
+                  TOTALS
+                </TableCell>
+                <TableCell className="text-right">
                   TOTALS
                 </TableCell>
                 <TableCell className="text-right text-green-600">
@@ -266,7 +269,10 @@ export function TrialBalance() {
               {/* Difference Row (if unbalanced) */}
               {!isBalanced && (
                 <TableRow className="bg-red-50 font-bold text-red-600">
-                  <TableCell colSpan={2} className="text-right">
+                  <TableCell className="text-right">
+                    DIFFERENCE
+                  </TableCell>
+                  <TableCell className="text-right">
                     DIFFERENCE
                   </TableCell>
                   <TableCell className="text-right">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
@@ -15,7 +15,7 @@ import { ledgerAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, getTransactionTypeColor, getDueDateStatus } from '@/lib/utils';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
-import type { PurchaseLedgerData, PurchaseTransaction } from '@/types/ledger';
+import type { PurchaseLedgerData } from '@/types/ledger';
 import { Search, Filter, Download } from 'lucide-react';
 
 export function PurchaseLedger() {
@@ -27,7 +27,7 @@ export function PurchaseLedger() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState<string>('');
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!isConfigured) {
       setError('Please configure your API settings first');
       setLoading(false);
@@ -52,11 +52,11 @@ export function PurchaseLedger() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isConfigured, getHeaders, currentPage, selectedSupplier]);
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, selectedSupplier, isConfigured]);
+  }, [fetchData]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);

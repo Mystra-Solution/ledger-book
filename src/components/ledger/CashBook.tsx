@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
@@ -15,7 +15,7 @@ import { ledgerAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, getTransactionTypeColor } from '@/lib/utils';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
-import type { CashBookData, CashTransaction } from '@/types/ledger';
+import type { CashBookData } from '@/types/ledger';
 import { Search, Filter, Download, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 
 export function CashBook() {
@@ -27,7 +27,7 @@ export function CashBook() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAccount, setSelectedAccount] = useState<string>('');
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!isConfigured) {
       setError('Please configure your API settings first');
       setLoading(false);
@@ -53,11 +53,11 @@ export function CashBook() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isConfigured, getHeaders, currentPage, selectedAccount]);
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, selectedAccount, isConfigured]);
+  }, [fetchData]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -181,8 +181,6 @@ export function CashBook() {
             </TableHeader>
             <TableBody>
               {filteredTransactions.map((transaction) => {
-                const isReceipt = parseFloat(transaction.receiptAmount) > 0;
-                
                 return (
                   <TableRow key={transaction.id}>
                     <TableCell>

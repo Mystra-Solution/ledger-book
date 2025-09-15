@@ -3,13 +3,12 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface UseApiRequestOptions<T> {
   apiCall: (headers: Record<string, string>) => Promise<T>;
-  dependencies?: any[];
+  dependencies?: unknown[];
   skipInitialCall?: boolean;
 }
 
 export function useApiRequest<T>({ 
   apiCall, 
-  dependencies = [], 
   skipInitialCall = false 
 }: UseApiRequestOptions<T>) {
   const { getHeaders, isConfigured } = useAuth();
@@ -36,13 +35,13 @@ export function useApiRequest<T>({
     } finally {
       setLoading(false);
     }
-  }, [isConfigured]); // Remove apiCall and getHeaders from dependencies
+  }, [isConfigured, apiCall, getHeaders]);
 
   useEffect(() => {
     if (!skipInitialCall && isConfigured) {
       executeRequest();
     }
-  }, [isConfigured, ...dependencies]); // Remove executeRequest from dependencies
+  }, [executeRequest, skipInitialCall, isConfigured]);
 
   return {
     data,
