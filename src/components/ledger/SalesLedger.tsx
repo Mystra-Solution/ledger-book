@@ -15,12 +15,12 @@ import { ledgerAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, getTransactionTypeColor, getDueDateStatus } from '@/lib/utils';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
-import type { SalesLedgerData } from '@/types/ledger';
+import type { SalesTransaction, TableResponse } from '@/types/ledger';
 import { Search, Filter, Download } from 'lucide-react';
 
 export function SalesLedger() {
   const { getHeaders, isConfigured } = useAuth();
-  const [data, setData] = useState<SalesLedgerData | null>(null);
+  const [data, setData] = useState<TableResponse<SalesTransaction> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,16 +44,17 @@ export function SalesLedger() {
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         ...(selectedCustomer && { customerId: selectedCustomer }),
+        ...(searchTerm && { search: searchTerm }),
       };
 
-      const response = await ledgerAPI.getSalesLedger(params, headers);
+      const response = await ledgerAPI.getSalesLedgerTable(params, headers);
       setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch sales ledger data');
     } finally {
       setLoading(false);
     }
-  }, [isConfigured, getHeaders, currentPage, selectedCustomer]);
+  }, [isConfigured, getHeaders, currentPage, selectedCustomer, searchTerm]);
 
   useEffect(() => {
     fetchData();
@@ -61,14 +62,8 @@ export function SalesLedger() {
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    // In a real app, you'd implement search logic here
+    setCurrentPage(1); // Reset to first page when searching
   };
-
-  const filteredTransactions = data?.transactions?.filter(transaction =>
-    transaction.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.referenceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
 
   if (loading) {
     return (
@@ -107,25 +102,25 @@ export function SalesLedger() {
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(data?.totalBalance || '0')}
+              {data?.transactions?.length || 0}
             </div>
-            <p className="text-gray-600">Total Sales Balance</p>
+            <p className="text-gray-600">Total Transactions</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-blue-600">
-              {data?.totalCustomers || 0}
+              {data?.total || 0}
             </div>
-            <p className="text-gray-600">Total Customers</p>
+            <p className="text-gray-600">Total Records</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-purple-600">
-              {data?.totalTransactions || 0}
+              {data?.totalPages || 0}
             </div>
-            <p className="text-gray-600">Total Transactions</p>
+            <p className="text-gray-600">Total Pages</p>
           </CardContent>
         </Card>
       </div>
@@ -179,7 +174,7 @@ export function SalesLedger() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransactions.map((transaction) => {
+              {data?.transactions?.map((transaction) => {
                 const dueStatus = getDueDateStatus(transaction.dueDate);
                 
                 return (
@@ -234,7 +229,7 @@ export function SalesLedger() {
             </TableBody>
           </Table>
           
-          {filteredTransactions.length === 0 && (
+          {data?.transactions?.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No transactions found
             </div>
@@ -242,7 +237,7 @@ export function SalesLedger() {
           
           <Pagination
             currentPage={currentPage}
-            totalPages={Math.ceil((data?.totalTransactions || 0) / ITEMS_PER_PAGE)}
+            totalPages={data?.totalPages || 1}
             onPageChange={setCurrentPage}
           />
         </CardContent>

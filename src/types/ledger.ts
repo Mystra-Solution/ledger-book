@@ -6,9 +6,19 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+// Table View Response Types
+export interface TableResponse<T> {
+  transactions: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // Sales Ledger Types
 export interface SalesTransaction {
   id: string;
+  tenantId: string;
   customerId: string;
   customerName: string;
   transactionType: string;
@@ -49,6 +59,7 @@ export interface SalesLedgerData {
 // Purchase Ledger Types
 export interface PurchaseTransaction {
   id: string;
+  tenantId: string;
   supplierId: string;
   supplierName: string;
   transactionType: string;
@@ -89,6 +100,7 @@ export interface PurchaseLedgerData {
 // Cash Book Types
 export interface CashTransaction {
   id: string;
+  tenantId: string;
   accountCode: string;
   accountName: string;
   transactionType: string;
@@ -233,6 +245,41 @@ export interface DateRangeParams {
   endDate?: string;
 }
 
+// Table View API Parameters
+export interface TableViewParams extends PaginationParams, DateRangeParams {
+  search?: string;
+  transactionType?: string;
+}
+
+export interface SalesLedgerTableParams extends TableViewParams {
+  customerId?: string;
+}
+
+export interface PurchaseLedgerTableParams extends TableViewParams {
+  supplierId?: string;
+}
+
+export interface CashBookTableParams extends TableViewParams {
+  accountCode?: string;
+}
+
+export interface CombinedTransactionsParams extends TableViewParams {
+  ledgerType?: 'sales' | 'purchase' | 'cashbook';
+}
+
+export interface CombinedTransactionsData {
+  salesLedger: TableResponse<SalesTransaction>;
+  purchaseLedger: TableResponse<PurchaseTransaction>;
+  cashBook: TableResponse<CashTransaction>;
+  summary: {
+    totalSalesTransactions: number;
+    totalPurchaseTransactions: number;
+    totalCashBookTransactions: number;
+    totalTransactions: number;
+  };
+}
+
+// Legacy parameter types (for backward compatibility)
 export interface SalesLedgerParams extends PaginationParams, DateRangeParams {
   customerId?: string;
 }

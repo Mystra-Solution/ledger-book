@@ -16,6 +16,15 @@ import type {
   GLTransactionParams,
   AccountBalanceParams,
   TrialBalanceParams,
+  SalesLedgerTableParams,
+  PurchaseLedgerTableParams,
+  CashBookTableParams,
+  CombinedTransactionsParams,
+  CombinedTransactionsData,
+  SalesTransaction,
+  PurchaseTransaction,
+  CashTransaction,
+  TableResponse,
 } from '@/types/ledger';
 
 class LedgerAPI {
@@ -58,6 +67,11 @@ class LedgerAPI {
     return this.request<SalesLedgerData>(ENDPOINTS.SUBSIDIARY_LEDGERS.SALES_LEDGER, params as Record<string, unknown>, headers);
   }
 
+  // New table-view API methods
+  async getSalesLedgerTable(params?: SalesLedgerTableParams, headers?: Record<string, string>): Promise<ApiResponse<TableResponse<SalesTransaction>>> {
+    return this.request<TableResponse<SalesTransaction>>(ENDPOINTS.SUBSIDIARY_LEDGERS.SALES_LEDGER_TABLE, params as Record<string, unknown>, headers);
+  }
+
   async getCustomerBalance(customerId: string, headers?: Record<string, string>): Promise<ApiResponse<SalesLedgerData>> {
     return this.request<SalesLedgerData>(`${ENDPOINTS.SUBSIDIARY_LEDGERS.SALES_LEDGER}/customer/${customerId}`, undefined, headers);
   }
@@ -65,6 +79,10 @@ class LedgerAPI {
   // Purchase Ledger APIs
   async getPurchaseLedger(params?: PurchaseLedgerParams, headers?: Record<string, string>): Promise<ApiResponse<PurchaseLedgerData>> {
     return this.request<PurchaseLedgerData>(ENDPOINTS.SUBSIDIARY_LEDGERS.PURCHASE_LEDGER, params as Record<string, unknown>, headers);
+  }
+
+  async getPurchaseLedgerTable(params?: PurchaseLedgerTableParams, headers?: Record<string, string>): Promise<ApiResponse<TableResponse<PurchaseTransaction>>> {
+    return this.request<TableResponse<PurchaseTransaction>>(ENDPOINTS.SUBSIDIARY_LEDGERS.PURCHASE_LEDGER_TABLE, params as Record<string, unknown>, headers);
   }
 
   async getSupplierBalance(supplierId: string, headers?: Record<string, string>): Promise<ApiResponse<PurchaseLedgerData>> {
@@ -76,6 +94,10 @@ class LedgerAPI {
     return this.request<CashBookData>(ENDPOINTS.SUBSIDIARY_LEDGERS.CASH_BOOK, params as Record<string, unknown>, headers);
   }
 
+  async getCashBookTable(params?: CashBookTableParams, headers?: Record<string, string>): Promise<ApiResponse<TableResponse<CashTransaction>>> {
+    return this.request<TableResponse<CashTransaction>>(ENDPOINTS.SUBSIDIARY_LEDGERS.CASH_BOOK_TABLE, params as Record<string, unknown>, headers);
+  }
+
   async getAccountBalance(accountCode: string, headers?: Record<string, string>): Promise<ApiResponse<CashBookData>> {
     return this.request<CashBookData>(`${ENDPOINTS.SUBSIDIARY_LEDGERS.CASH_BOOK}/account/${accountCode}`, undefined, headers);
   }
@@ -83,6 +105,11 @@ class LedgerAPI {
   // Summary APIs
   async getLedgerSummaries(headers?: Record<string, string>): Promise<ApiResponse<LedgerSummary>> {
     return this.request<LedgerSummary>(ENDPOINTS.SUBSIDIARY_LEDGERS.SUMMARIES, undefined, headers);
+  }
+
+  // Combined Transactions Table API
+  async getCombinedTransactionsTable(params?: CombinedTransactionsParams, headers?: Record<string, string>): Promise<ApiResponse<CombinedTransactionsData>> {
+    return this.request<CombinedTransactionsData>(ENDPOINTS.SUBSIDIARY_LEDGERS.TRANSACTIONS_TABLE, params as Record<string, unknown>, headers);
   }
 
   // General Ledger APIs

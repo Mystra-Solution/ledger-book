@@ -14,6 +14,11 @@ export const ENDPOINTS = {
     PURCHASE_LEDGER: '/api/accounting/subsidiary-ledgers/purchase-ledger',
     CASH_BOOK: '/api/accounting/subsidiary-ledgers/cash-book',
     SUMMARIES: '/api/accounting/subsidiary-ledgers/summaries',
+    // New table-view endpoints
+    SALES_LEDGER_TABLE: '/api/accounting/subsidiary-ledgers/sales-ledger/table',
+    PURCHASE_LEDGER_TABLE: '/api/accounting/subsidiary-ledgers/purchase-ledger/table',
+    CASH_BOOK_TABLE: '/api/accounting/subsidiary-ledgers/cash-book/table',
+    TRANSACTIONS_TABLE: '/api/accounting/subsidiary-ledgers/transactions/table',
   },
   GENERAL_LEDGER: {
     TRANSACTIONS: '/api/accounting/general-ledger/transactions',
@@ -47,10 +52,18 @@ export const STATUS_COLORS = {
 
 // Transaction Types
 export const TRANSACTION_TYPES = {
+  // Sales Ledger
   SALE: 'SALE',
-  PURCHASE: 'PURCHASE',
-  RECEIPT: 'RECEIPT',
+  RETURN: 'RETURN',
+  ADJUSTMENT: 'ADJUSTMENT',
+  REFUND: 'REFUND',
   PAYMENT: 'PAYMENT',
+  // Purchase Ledger
+  PURCHASE: 'PURCHASE',
+  // Cash Book
+  RECEIPT: 'RECEIPT',
+  TRANSFER: 'TRANSFER',
+  BANK_CHARGE: 'BANK_CHARGE',
 };
 
 // Payment Terms
