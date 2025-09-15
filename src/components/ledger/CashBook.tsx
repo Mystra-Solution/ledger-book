@@ -15,12 +15,12 @@ import { ledgerAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, getTransactionTypeColor } from '@/lib/utils';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
-import type { CashBookData } from '@/types/ledger';
+import type { CashTransaction, TableResponse } from '@/types/ledger';
 import { Search, Filter, Download, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 
 export function CashBook() {
   const { getHeaders, isConfigured } = useAuth();
-  const [data, setData] = useState<CashBookData | null>(null);
+  const [data, setData] = useState<TableResponse<CashTransaction> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,16 +44,17 @@ export function CashBook() {
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         ...(selectedAccount && { accountCode: selectedAccount }),
+        ...(searchTerm && { search: searchTerm }),
       };
 
-      const response = await ledgerAPI.getCashBook(params, headers);
+      const response = await ledgerAPI.getCashBookTable(params, headers);
       setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch cash book data');
     } finally {
       setLoading(false);
     }
-  }, [isConfigured, getHeaders, currentPage, selectedAccount]);
+  }, [isConfigured, getHeaders, currentPage, selectedAccount, searchTerm]);
 
   useEffect(() => {
     fetchData();
@@ -61,14 +62,8 @@ export function CashBook() {
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
+    setCurrentPage(1); // Reset to first page when searching
   };
-
-  const filteredTransactions = data?.transactions?.filter(transaction =>
-    transaction.accountName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.partyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.referenceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
 
   if (loading) {
     return (
@@ -107,25 +102,25 @@ export function CashBook() {
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-blue-600">
-              {formatCurrency(data?.totalBalance || '0')}
+              {data?.transactions?.length || 0}
             </div>
-            <p className="text-gray-600">Total Cash Balance</p>
+            <p className="text-gray-600">Total Transactions</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-green-600">
-              {data?.totalAccounts || 0}
+              {data?.total || 0}
             </div>
-            <p className="text-gray-600">Total Accounts</p>
+            <p className="text-gray-600">Total Records</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-6">
             <div className="text-2xl font-bold text-purple-600">
-              {data?.totalTransactions || 0}
+              {data?.totalPages || 0}
             </div>
-            <p className="text-gray-600">Total Transactions</p>
+            <p className="text-gray-600">Total Pages</p>
           </CardContent>
         </Card>
       </div>
@@ -180,7 +175,7 @@ export function CashBook() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransactions.map((transaction) => {
+              {data?.transactions?.map((transaction) => {
                 return (
                   <TableRow key={transaction.id}>
                     <TableCell>
@@ -236,7 +231,7 @@ export function CashBook() {
             </TableBody>
           </Table>
           
-          {filteredTransactions.length === 0 && (
+          {data?.transactions?.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No transactions found
             </div>
@@ -244,7 +239,7 @@ export function CashBook() {
           
           <Pagination
             currentPage={currentPage}
-            totalPages={Math.ceil((data?.totalTransactions || 0) / ITEMS_PER_PAGE)}
+            totalPages={data?.totalPages || 1}
             onPageChange={setCurrentPage}
           />
         </CardContent>
